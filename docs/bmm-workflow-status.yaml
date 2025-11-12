@@ -31,19 +31,20 @@ workflow_path: "method-greenfield.yaml"
 workflow_status:
   # Phase 0: Discovery (Optional - based on your choices)
   brainstorm-project: docs/bmm-brainstorming-session-2025-11-12.md  # agent: analyst
-  research: required  # agent: analyst
-  product-brief: required  # agent: analyst
+  research: skipped  # agent: analyst (sẽ thực hiện sau)
+  product-brief: docs/product-brief-Silica-link-2025-11-12.md  # agent: analyst
 
   # Phase 1: Planning
-  prd: required  # agent: pm
+  prd: docs/PRD.md  # agent: pm
   validate-prd: optional  # agent: pm
   create-design: conditional  # agent: ux-designer (if_has_ui)
 
   # Phase 2: Solutioning
-  create-architecture: required  # agent: architect
+  create-architecture: docs/architecture.md  # agent: architect
   validate-architecture: optional  # agent: architect
   solutioning-gate-check: required  # agent: architect
 
   # Phase 3: Implementation
   sprint-planning: required  # agent: sm
+  create-epics-and-stories: docs/epics.md  # agent: pm
 
