@@ -293,7 +293,10 @@ Silica-link là nền tảng tích hợp tự động hóa quy trình Đặt hà
 **FR-6.3: Dashboard**
 - Portal MUST display agency rank (Starter/Silver/Gold/Platinum)
 - Portal MUST display discount rate (based on rank)
-- Portal MUST display commission/rewards summary
+- Portal MUST display gauge "còn X chai để đạt hạng kế tiếp"
+- Portal MUST display sales summary (current period, last 12 months)
+
+**Note:** Commission/rewards chỉ dành cho Affiliate Partners (FR-10), không phải Agency. Agency chỉ có rank và discount rate.
 
 ### FR-7: Procurement Automation
 

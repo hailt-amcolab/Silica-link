@@ -1305,16 +1305,16 @@ So that **tôi biết đơn hàng đang ở đâu**.
 ### Story 7.4: Agency Dashboard
 
 As an **Agency**,
-I want **xem dashboard với rank, discount và commission**,
-So that **tôi biết thông tin về hạng và phần thưởng**.
+I want **xem dashboard với rank và discount rate**,
+So that **tôi biết thông tin về hạng và chiết khấu**.
 
 **Acceptance Criteria:**
 - **Given** Agency đã đăng nhập
 - **When** xem dashboard
 - **Then** hiển thị agency rank (Starter/Silver/Gold/Platinum)
 - **And** hiển thị discount rate (based on rank)
-- **And** hiển thị commission/rewards summary
 - **And** hiển thị gauge "còn X chai để đạt hạng kế tiếp"
+- **And** hiển thị sales summary (current period, last 12 months)
 
 **Prerequisites:** Story 7.1, Story 10.1 (Agency Rank)
 
@@ -1322,15 +1322,17 @@ So that **tôi biết thông tin về hạng và phần thưởng**.
 - Kintone dashboard/widget trong Guest Space
 - Display rank từ Partners App
 - Display discount rate từ Pricing Rules App
-- Display commission/rewards từ RewardsLedger App
-- Calculate gauge (progress to next rank)
+- Calculate gauge (progress to next rank) - API từ Story 10.1
+- Display sales summary từ Orders App (filtered by agency_id)
+
+**Note:** Commission/rewards chỉ dành cho Affiliate (Epic 11), không phải Agency. Agency chỉ có rank và discount rate.
 
 **Tasks chi tiết:**
 - Research Kintone dashboard/widget: 2h
 - Design dashboard layout: 2h
 - Implement rank display: 1.5h
 - Implement discount rate display: 1.5h
-- Implement commission/rewards summary: 2h
+- Implement sales summary display: 2h
 - Implement gauge calculation: 2h
 - Testing: 1h
 
