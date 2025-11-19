@@ -1,0 +1,1 @@
+Thêm marketplace ngoài Shopify×2/楽天/Amazon; đồng bộ ngược về kênh; CRM/MA; đối chiếu nâng cao ngoài phạm vi GMO; trả hàng/đổi/ xuyên biên giới; tính năng WMS nâng cao (tối ưu wave picking…); tích hợp ERP; BI/data lake; app native; giá đa tiền tệ/FX; vận hành marketplace; hoàn tiền tự động/chargeback; định dạng EDI riêng theo từng NCC.
