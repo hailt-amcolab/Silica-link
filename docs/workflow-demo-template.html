@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workflow Demo - Silica-link</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      padding-bottom: 180px;
+      /* Space for fixed controls */
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 2em;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 1.1em;
+    }
+
+    .workflow-container {
+      position: relative;
+      min-height: 500px;
+      margin: 40px 0;
+    }
+
+    .step {
+      background: #f8f9fa;
+      border: 3px solid #e0e0e0;
+      border-radius: 15px;
+      padding: 25px;
+      margin: 20px 0;
+      position: relative;
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0.4;
+      transform: translateY(20px) scale(0.95);
+      scroll-margin-top: 100px;
+      /* Space from top when scrolling */
+      scroll-margin-bottom: 150px;
+      /* Space for fixed controls at bottom */
+    }
+
+    .step.active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      border-color: #667eea;
+      background: #f0f4ff;
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+      animation: slideInFade 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .step.completed {
+      opacity: 0.7;
+      transform: translateY(0) scale(0.98);
+      border-color: #28a745;
+      background: #f0fff4;
+      transition: all 0.4s ease;
+    }
+
+    @keyframes slideInFade {
+      from {
+        opacity: 0.4;
+        transform: translateY(20px) scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .step-number {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      background: #667eea;
+      color: white;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 40px;
+      font-weight: bold;
+      margin-right: 15px;
+      font-size: 1.2em;
+    }
+
+    .step.active .step-number {
+      background: #667eea;
+      animation: pulse 2s infinite;
+    }
+
+    .step.completed .step-number {
+      background: #28a745;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.1);
+      }
+    }
+
+    .step-title {
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .step-description {
+      color: #666;
+      line-height: 1.6;
+      margin-left: 55px;
+    }
+
+    .step-icon {
+      font-size: 1.5em;
+      margin-right: 10px;
+    }
+
+    .arrow {
+      text-align: center;
+      font-size: 2em;
+      color: #667eea;
+      margin: -10px 0;
+      opacity: 0.3;
+      transition: opacity 0.3s;
+    }
+
+    .arrow.active {
+      opacity: 1;
+      animation: bounce 1s infinite;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-5px);
+      }
+    }
+
+    .controls {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      padding: 20px 30px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.5);
+      z-index: 1000;
+      border-radius: 50px;
+      display: inline-block;
+      width: auto;
+      min-width: fit-content;
+    }
+
+    /* Responsive: On mobile, controls stay at bottom but adjust padding */
+    @media (max-width: 768px) {
+      .controls {
+        bottom: 20px;
+        padding: 15px 20px;
+        border-radius: 40px;
+      }
+
+      .btn {
+        padding: 12px 20px;
+        font-size: 0.9em;
+        margin: 0 5px;
+      }
+
+      .container {
+        padding-bottom: 160px;
+      }
+    }
+
+    .btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1em;
+      border-radius: 25px;
+      cursor: pointer;
+      margin: 0 6px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn:hover {
+      background: #5568d3;
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+    }
+
+    .btn:active {
+      transform: translateY(0) scale(1);
+      box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+      box-shadow: 0 4px 12px rgba(108, 117, 125, 0.5);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      width: 0%;
+      transition: width 0.5s ease;
+      border-radius: 10px;
+    }
+
+    .step-details {
+      margin-top: 15px;
+      padding: 15px;
+      background: white;
+      border-radius: 10px;
+      border-left: 4px solid #667eea;
+      margin-left: 55px;
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s;
+    }
+
+    .step.active .step-details,
+    .step.completed .step-details {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .step-details h4 {
+      color: #667eea;
+      margin-bottom: 8px;
+    }
+
+    .step-details ul {
+      margin-left: 20px;
+      color: #555;
+    }
+
+    .step-details li {
+      margin: 5px 0;
+    }
+
+    .step-screenshot {
+      margin-top: 20px;
+      margin-left: 55px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      max-width: 800px;
+      background: #f0f0f0;
+      border: 2px solid #e0e0e0;
+      opacity: 0;
+      transform: translateY(10px) scale(0.98);
+      transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s;
+    }
+
+    .step.active .step-screenshot,
+    .step.completed .step-screenshot {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .step-screenshot img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .step-screenshot.placeholder {
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: #666;
+      font-size: 1.1em;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .step-screenshot.placeholder::before {
+      content: "📸";
+      font-size: 3em;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .screenshot-caption {
+      margin-top: 10px;
+      margin-left: 55px;
+      color: #666;
+      font-style: italic;
+      font-size: 0.9em;
+      opacity: 0;
+      transform: translateY(5px);
+      transition: opacity 0.4s ease 0.4s, transform 0.4s ease 0.4s;
+    }
+
+    .step.active .screenshot-caption,
+    .step.completed .screenshot-caption {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 30px;
+      margin-bottom: 40px;
+      /* Extra space before fixed controls */
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+    }
+
+    .legend-color.pending {
+      background: #e0e0e0;
+    }
+
+    .legend-color.active {
+      background: #667eea;
+    }
+
+    .legend-color.completed {
+      background: #28a745;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>🔄 Workflow Demo: <span id="workflow-title">Order Processing Automation</span></h1>
+    <p class="subtitle">Click "Next Step" để xem từng bước trong quy trình</p>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress"></div>
+    </div>
+
+    <div class="workflow-container" id="workflow">
+      <!-- Steps will be inserted here by JavaScript -->
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-secondary" id="btn-reset" onclick="resetWorkflow()">🔄 Reset</button>
+      <button class="btn btn-secondary" id="btn-prev" onclick="previousStep()">◀ Previous</button>
+      <button class="btn" id="btn-next" onclick="nextStep()">Next Step ▶</button>
+      <button class="btn" id="btn-auto" onclick="toggleAuto()">▶ Auto Play</button>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color pending"></div>
+        <span>Chưa thực hiện</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color active"></div>
+        <span>Đang thực hiện</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color completed"></div>
+        <span>Hoàn thành</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Workflow data - Có thể customize cho từng Epic
+    // CHỈ BAO GỒM: Những gì khách hàng có thể THẤY và THAO TÁC được
+    const workflowData = {
+      title: "Order Processing Automation - Từ Góc Nhìn Người Dùng",
+      steps: [
+        {
+          number: 1,
+          icon: "🛒",
+          title: "Khách Hàng Đặt Hàng Trên Shopify",
+          description: "Khách hàng vào website Shopify, chọn sản phẩm và đặt hàng",
+          screenshot: "screenshots/01-shopify-order.png",
+          screenshotCaption: "Màn hình Shopify - Khách hàng đặt hàng",
+          details: {
+            title: "Khách hàng thấy:",
+            items: [
+              "Website Shopify với catalog sản phẩm",
+              "Giỏ hàng với items đã chọn",
+              "Form nhập thông tin giao hàng",
+              "Nút 'Đặt hàng' để submit"
+            ]
+          }
+        },
+        {
+          number: 2,
+          icon: "📄",
+          title: "Order Tự Động Xuất Hiện Trong Kintone",
+          description: "Order mới tự động xuất hiện trong Kintone Orders App (không cần nhập manual)",
+          screenshot: "screenshots/02-kintone-order-app.png",
+          screenshotCaption: "Màn hình Kintone Orders App - Order mới tự động xuất hiện",
+          details: {
+            title: "Nhân viên thấy trong Kintone:",
+            items: [
+              "Order mới với status '新規受注' (New Order)",
+              "Thông tin khách hàng đã được điền sẵn",
+              "Danh sách sản phẩm và số lượng",
+              "Thời gian order được tạo tự động"
+            ]
+          }
+        },
+        {
+          number: 3,
+          icon: "📊",
+          title: "Kiểm Tra Tồn Kho Tự Động",
+          description: "Hệ thống tự động kiểm tra tồn kho và hiển thị kết quả trong Kintone",
+          screenshot: "screenshots/03-inventory-check.png",
+          screenshotCaption: "Màn hình Kintone - Hiển thị kết quả kiểm tra tồn kho",
+          details: {
+            title: "Nhân viên thấy:",
+            items: [
+              "Tồn kho đủ → Status tự động chuyển thành '在庫あり' (In Stock)",
+              "Tồn kho thiếu → Status '在庫不足' (Out of Stock) với cảnh báo",
+              "Số lượng tồn kho hiện tại cho từng SKU",
+              "Thông tin kho chứa hàng (Amagasaki hoặc Gifu)"
+            ]
+          }
+        },
+        {
+          number: 4,
+          icon: "✅",
+          title: "Nhân Viên Xác Nhận Order",
+          description: "Nhân viên review order trong Kintone và click 'Xác nhận'",
+          screenshot: "screenshots/04-confirm-order.png",
+          screenshotCaption: "Màn hình Kintone - Nhân viên xác nhận order",
+          details: {
+            title: "Nhân viên thao tác:",
+            items: [
+              "Click vào order để xem chi tiết",
+              "Review thông tin khách hàng và sản phẩm",
+              "Click nút '受注確定' (Confirm Order)",
+              "Status tự động chuyển thành '受注確定' (Order Confirmed)"
+            ]
+          }
+        },
+        {
+          number: 5,
+          icon: "📦",
+          title: "Tồn Kho Tự Động Được Trừ",
+          description: "Sau khi confirm, tồn kho logic tự động được trừ trong Kintone Stock App",
+          screenshot: "screenshots/05-stock-updated.png",
+          screenshotCaption: "Màn hình Kintone Stock App - Tồn kho được cập nhật tự động",
+          details: {
+            title: "Nhân viên thấy trong Stock App:",
+            items: [
+              "Số lượng tồn kho giảm đi theo số lượng order",
+              "Tồn kho logic (論理在庫) được reserve cho order",
+              "Lịch sử thay đổi tồn kho được ghi lại",
+              "Cảnh báo nếu tồn kho xuống thấp"
+            ]
+          }
+        },
+        {
+          number: 6,
+          icon: "📋",
+          title: "Picking Task Tự Động Được Tạo",
+          description: "Task xuất kho tự động xuất hiện trong Kintone Task App cho nhân viên kho",
+          screenshot: "screenshots/06-picking-task.png",
+          screenshotCaption: "Màn hình Kintone Task App - Picking task tự động được tạo",
+          details: {
+            title: "Nhân viên kho thấy:",
+            items: [
+              "Task mới với tên '出荷タスク - Order #12345'",
+              "Danh sách SKU cần pick với số lượng",
+              "Vị trí kệ (棚) chứa hàng",
+              "Thông tin order liên quan"
+            ]
+          }
+        },
+        {
+          number: 7,
+          icon: "📱",
+          title: "Nhân Viên Kho Scan Barcode",
+          description: "Nhân viên kho dùng mobile app scan barcode để confirm picking",
+          screenshot: "screenshots/07-warehouse-scan.png",
+          screenshotCaption: "Màn hình Mobile App - Nhân viên kho scan barcode",
+          details: {
+            title: "Nhân viên kho thao tác:",
+            items: [
+              "Mở mobile app trên điện thoại",
+              "Scan barcode của sản phẩm",
+              "Scan barcode của vị trí kệ",
+              "Confirm số lượng đã pick",
+              "Task tự động chuyển thành '完了' (Completed)"
+            ]
+          }
+        },
+        {
+          number: 8,
+          icon: "🚚",
+          title: "Shipping Label Tự Động Được Tạo",
+          description: "Sau khi picking xong, shipping label tự động được tạo và hiển thị trong Kintone",
+          screenshot: "screenshots/08-shipping-label.png",
+          screenshotCaption: "Màn hình Kintone - Shipping label và tracking number",
+          details: {
+            title: "Nhân viên thấy:",
+            items: [
+              "Shipping label PDF được tạo tự động",
+              "Tracking number hiển thị trong order record",
+              "Link download label để in",
+              "Thông tin vận chuyển (carrier, service)"
+            ]
+          }
+        },
+        {
+          number: 9,
+          icon: "📧",
+          title: "Khách Hàng Nhận Email Tracking",
+          description: "Khách hàng nhận email tự động với tracking number để theo dõi đơn hàng",
+          screenshot: "screenshots/09-customer-email.png",
+          screenshotCaption: "Email gửi cho khách hàng - Tracking information",
+          details: {
+            title: "Khách hàng thấy trong email:",
+            items: [
+              "Thông báo đơn hàng đã được gửi",
+              "Tracking number để theo dõi",
+              "Link track shipment",
+              "Thời gian dự kiến giao hàng"
+            ]
+          }
+        },
+        {
+          number: 10,
+          icon: "🎉",
+          title: "Hoàn Thành - Zero Manual Entry",
+          description: "Toàn bộ quy trình tự động, nhân viên không cần nhập liệu thủ công",
+          screenshot: "screenshots/10-complete-dashboard.png",
+          screenshotCaption: "Dashboard Kintone - Tổng quan orders đã xử lý",
+          details: {
+            title: "Kết quả:",
+            items: [
+              "✅ Order được tạo tự động từ Shopify",
+              "✅ Tồn kho được cập nhật tự động",
+              "✅ Picking task được tạo tự động",
+              "✅ Shipping label được tạo tự động",
+              "✅ Khách hàng nhận tracking tự động",
+              "✅ Nhân viên KHÔNG cần nhập manual"
+            ]
+          }
+        }
+      ]
+    };
+
+    let currentStep = 0;
+    let autoPlay = false;
+    let autoPlayInterval = null;
+
+    // Initialize workflow
+    function initWorkflow() {
+      const workflowContainer = document.getElementById('workflow');
+      const titleElement = document.getElementById('workflow-title');
+      titleElement.textContent = workflowData.title;
+
+      workflowContainer.innerHTML = '';
+
+      workflowData.steps.forEach((step, index) => {
+        const stepElement = document.createElement('div');
+        stepElement.className = 'step';
+        stepElement.id = `step-${index}`;
+
+        const arrow = index > 0 ? '<div class="arrow">⬇</div>' : '';
+
+        // Build screenshot HTML
+        let screenshotHTML = '';
+        if (step.screenshot) {
+          screenshotHTML = `
+            <div class="step-screenshot ${step.screenshot.includes('placeholder') ? 'placeholder' : ''}" style="display: none;">
+              ${step.screenshot.includes('placeholder')
+              ? `<div>Chưa có ảnh<br><small>Đặt ảnh tại: ${step.screenshot}</small></div>`
+              : `<img src="${step.screenshot}" alt="${step.screenshotCaption || step.title}" onerror="this.parentElement.classList.add('placeholder'); this.parentElement.innerHTML='<div>Không tìm thấy ảnh<br><small>Đặt ảnh tại: ${step.screenshot}</small></div>';">
+              `}
+            </div>
+            ${step.screenshotCaption ? `<div class="screenshot-caption" style="display: none;">${step.screenshotCaption}</div>` : ''}
+          `;
+        }
+
+        stepElement.innerHTML = `
+                    ${arrow}
+                    <div>
+                        <span class="step-number">${step.number}</span>
+                        <span class="step-icon">${step.icon}</span>
+                        <span class="step-title">${step.title}</span>
+                        <div class="step-description">${step.description}</div>
+                        ${screenshotHTML}
+                        <div class="step-details" style="display: none;">
+                            <h4>${step.details.title}</h4>
+                            <ul>
+                                ${step.details.items.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+
+        workflowContainer.appendChild(stepElement);
+      });
+
+      updateWorkflow();
+    }
+
+    function updateWorkflow() {
+      const totalSteps = workflowData.steps.length;
+      const progress = ((currentStep + 1) / totalSteps) * 100;
+      document.getElementById('progress').style.width = progress + '%';
+
+      // Update steps
+      workflowData.steps.forEach((step, index) => {
+        const stepElement = document.getElementById(`step-${index}`);
+        const detailsElement = stepElement.querySelector('.step-details');
+        const screenshotElement = stepElement.querySelector('.step-screenshot');
+        const captionElement = stepElement.querySelector('.screenshot-caption');
+
+        stepElement.classList.remove('active', 'completed');
+
+        if (index < currentStep) {
+          stepElement.classList.add('completed');
+          if (detailsElement) {
+            detailsElement.style.display = 'block';
+          }
+          if (screenshotElement) {
+            screenshotElement.style.display = 'block';
+          }
+          if (captionElement) {
+            captionElement.style.display = 'block';
+          }
+        } else if (index === currentStep) {
+          stepElement.classList.add('active');
+          if (detailsElement) {
+            detailsElement.style.display = 'block';
+          }
+          if (screenshotElement) {
+            screenshotElement.style.display = 'block';
+          }
+          if (captionElement) {
+            captionElement.style.display = 'block';
+          }
+
+          // Smooth scroll to active step after animation starts
+          setTimeout(() => {
+            stepElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+              inline: 'nearest'
+            });
+          }, 300); // Wait for step animation to start (0.3s)
+        } else {
+          // Hide with smooth fade out
+          if (detailsElement) {
+            detailsElement.style.display = 'none';
+          }
+          if (screenshotElement) {
+            screenshotElement.style.display = 'none';
+          }
+          if (captionElement) {
+            captionElement.style.display = 'none';
+          }
+        }
+      });
+
+      // Update arrows
+      document.querySelectorAll('.arrow').forEach((arrow, index) => {
+        arrow.classList.toggle('active', index < currentStep);
+      });
+
+      // Update buttons
+      document.getElementById('btn-prev').disabled = currentStep === 0;
+      document.getElementById('btn-next').disabled = currentStep === totalSteps - 1;
+    }
+
+    function nextStep() {
+      if (currentStep < workflowData.steps.length - 1) {
+        currentStep++;
+        updateWorkflow();
+      }
+    }
+
+    function previousStep() {
+      if (currentStep > 0) {
+        currentStep--;
+        updateWorkflow();
+      }
+    }
+
+    function resetWorkflow() {
+      currentStep = 0;
+      updateWorkflow();
+      // Smooth scroll to top
+      setTimeout(() => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }, 300);
+    }
+
+    function toggleAuto() {
+      autoPlay = !autoPlay;
+      const btn = document.getElementById('btn-auto');
+
+      if (autoPlay) {
+        btn.textContent = '⏸ Pause';
+        autoPlayInterval = setInterval(() => {
+          if (currentStep < workflowData.steps.length - 1) {
+            nextStep();
+          } else {
+            toggleAuto();
+            // Scroll to top when finished
+            setTimeout(() => {
+              window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+              });
+            }, 500);
+          }
+        }, 4000); // 4 seconds per step (allows animation + scroll)
+      } else {
+        btn.textContent = '▶ Auto Play';
+        if (autoPlayInterval) {
+          clearInterval(autoPlayInterval);
+          autoPlayInterval = null;
+        }
+      }
+    }
+
+    // Initialize on load
+    initWorkflow();
+  </script>
+</body>
+
+</html>

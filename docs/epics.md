@@ -1024,8 +1024,8 @@ So that **operations team có visibility realtime về order status**.
 ## Summary
 
 **Total Epics:** 10  
-**Total Stories:** 70+  
-**FR Coverage:** ✅ All 113 FRs mapped
+**Total Stories:** 95+ (70+ original + 25 from Advanced Elicitation)  
+**FR Coverage:** ✅ All 113 FRs mapped + enhancements identified
 
 **Epic Sequencing:**
 1. Foundation & Infrastructure (enables all)
@@ -1043,6 +1043,351 @@ So that **operations team có visibility realtime về order status**.
 
 ---
 
-**Document Status:** Complete  
+## Advanced Elicitation Analysis
+
+Sau khi áp dụng các phương pháp Advanced Elicitation, chúng tôi đã phát hiện các missing stories và improvements sau:
+
+### 1. Five Whys Analysis - Missing Edge Cases
+
+**Question:** Tại sao webhook processing có thể fail?
+
+**Why 1:** Webhook payload không đúng format → **Missing Story:** Handle malformed webhook payloads gracefully
+**Why 2:** Kintone API rate limit exceeded → **Missing Story:** Queue throttling và rate limit handling
+**Why 3:** Redis connection lost trong quá trình process → **Missing Story:** Handle Redis failures mid-processing
+**Why 4:** Inventory check race condition (2 orders cùng lúc check cùng SKU) → **Missing Story:** Inventory reservation/locking mechanism
+**Why 5:** Yoom gateway timeout hoặc không response → **Missing Story:** Timeout handling và circuit breaker cho Yoom
+
+**New Stories Identified:**
+- **Story 2.11:** Handle Malformed Webhook Payloads
+- **Story 2.12:** Kintone API Rate Limiting & Queue Throttling
+- **Story 2.13:** Redis Failure Recovery Mid-Processing
+- **Story 2.14:** Inventory Reservation/Locking Mechanism
+- **Story 2.15:** Yoom Gateway Timeout & Circuit Breaker
+
+---
+
+### 2. Journey Mapping - Missing User Journey Steps
+
+#### Journey Gap: Nhân viên Đơn hàng - Order Review & Exception Handling
+
+**Missing Steps:**
+1. **Review Failed Orders:** Nhân viên cần interface để review orders bị reject (inventory insufficient, validation failed)
+2. **Manual Override:** Nhân viên cần khả năng manual override khi có edge cases
+3. **Bulk Actions:** Nhân viên cần bulk approve/reject orders khi có nhiều orders cùng lúc
+
+**New Stories Identified:**
+- **Story 2.16:** Failed Order Review Interface
+- **Story 2.17:** Manual Override for Edge Cases
+- **Story 2.18:** Bulk Order Actions (Approve/Reject)
+
+#### Journey Gap: Đại lý - Order Modification & Cancellation
+
+**Missing Steps:**
+1. **Modify Order:** Đại lý cần khả năng modify order trước khi được approve
+2. **Cancel Order:** Đại lý cần khả năng cancel order (với approval workflow)
+3. **Order Draft:** Đại lý cần save order as draft để complete later
+
+**New Stories Identified:**
+- **Story 5.11:** Modify Order Before Approval
+- **Story 5.12:** Cancel Order with Approval Workflow
+- **Story 5.13:** Save Order as Draft
+
+---
+
+### 3. Pre-mortem Analysis - Failure Scenarios
+
+**Scenario 1: Inventory Sync Lag**
+- **Failure:** Inventory trong Kintone không sync realtime → overselling
+- **Missing Story:** Inventory sync monitoring và alerting
+
+**Scenario 2: Webhook Processing Backlog**
+- **Failure:** Webhook queue quá dài → orders bị delay nhiều giờ
+- **Missing Story:** Webhook queue monitoring và auto-scaling
+
+**Scenario 3: Kintone API Downtime**
+- **Failure:** Kintone API down → không thể create orders
+- **Missing Story:** Kintone API health check và fallback mechanism
+
+**New Stories Identified:**
+- **Story 2.19:** Inventory Sync Monitoring & Alerting
+- **Story 2.20:** Webhook Queue Monitoring & Auto-scaling
+- **Story 2.21:** Kintone API Health Check & Fallback
+
+---
+
+### 4. Red Team Analysis - Security & Attack Vectors
+
+**Attack Vector 1: Webhook Replay Attack**
+- **Threat:** Attacker replay old webhooks để tạo duplicate orders
+- **Missing Story:** Webhook timestamp validation và replay protection
+
+**Attack Vector 2: Inventory Manipulation**
+- **Threat:** Attacker manipulate inventory data để oversell
+- **Missing Story:** Inventory change audit trail và anomaly detection
+
+**Attack Vector 3: BtoB Portal Authentication Bypass**
+- **Threat:** Attacker access other đại lý's orders
+- **Missing Story:** Authorization checks và data isolation testing
+
+**New Stories Identified:**
+- **Story 2.22:** Webhook Replay Protection (Timestamp Validation)
+- **Story 4.15:** Inventory Change Audit Trail & Anomaly Detection
+- **Story 5.14:** BtoB Portal Authorization & Data Isolation Testing
+
+---
+
+### 5. Devil's Advocate - Challenging Assumptions
+
+**Assumption 1:** "Tất cả orders từ Shopify đều valid"
+- **Challenge:** What if Shopify sends corrupted data? What if order has negative quantities?
+- **Missing Story:** Comprehensive data validation với business rules
+
+**Assumption 2:** "Kintone API luôn available"
+- **Challenge:** What if Kintone has maintenance window? What if API changes?
+- **Missing Story:** Kintone API versioning và backward compatibility
+
+**Assumption 3:** "Đại lý luôn đặt hàng đúng"
+- **Challenge:** What if đại lý đặt hàng với quantity = 0? What if SKU không tồn tại?
+- **Missing Story:** BtoB Portal validation với clear error messages
+
+**New Stories Identified:**
+- **Story 2.23:** Comprehensive Business Rules Validation
+- **Story 2.24:** Kintone API Versioning & Backward Compatibility
+- **Story 5.15:** BtoB Portal Validation & Error Messages
+
+---
+
+### 6. Value Chain Analysis - Missing Optimization Points
+
+**Gap 1: Order-to-Cash Time Optimization**
+- **Missing:** Auto-confirm orders khi payment verified (FR85 exists nhưng chưa có story detail)
+- **Enhancement:** Story 6.2 cần thêm details về payment verification flow
+
+**Gap 2: Fulfillment Efficiency**
+- **Missing:** Optimize picking route trong warehouse (pick multiple orders cùng lúc)
+- **New Story:** Story 3.6: Optimize Picking Route (Multi-Order Picking)
+
+**Gap 3: Inventory Turnover**
+- **Missing:** Alert khi inventory aging (hàng tồn kho quá lâu)
+- **New Story:** Story 4.16: Inventory Aging Alerts
+
+---
+
+### 7. Stakeholder Mapping - Missing Stakeholder Needs
+
+**Stakeholder: Nhân viên Kế toán**
+- **Missing Need:** Export financial data để reconciliation
+- **New Story:** Story 6.7: Financial Data Export for Reconciliation
+
+**Stakeholder: Manager**
+- **Missing Need:** Approval workflow notifications (email/SMS khi có order cần approve)
+- **New Story:** Story 5.16: Approval Workflow Notifications
+
+**Stakeholder: Warehouse Manager**
+- **Missing Need:** Daily warehouse activity report
+- **New Story:** Story 4.17: Daily Warehouse Activity Report
+
+---
+
+## Updated Epic Breakdown with Missing Stories
+
+### Epic 2: Order Processing Automation (Enhanced)
+
+**Additional Stories from Advanced Elicitation:**
+
+#### Story 2.11: Handle Malformed Webhook Payloads
+**As a system**, I want **handle malformed webhook payloads gracefully**, So that **system không crash khi có invalid data**.
+
+**FR Coverage:** Error handling enhancement
+
+#### Story 2.12: Kintone API Rate Limiting & Queue Throttling
+**As a system**, I want **throttle requests to Kintone API và handle rate limits**, So that **tôi không bị rate limit errors**.
+
+**FR Coverage:** FR8 enhancement
+
+#### Story 2.13: Redis Failure Recovery Mid-Processing
+**As a system**, I want **recover từ Redis failures trong quá trình process**, So that **data không bị mất khi Redis down**.
+
+**FR Coverage:** FR1 enhancement
+
+#### Story 2.14: Inventory Reservation/Locking Mechanism
+**As a system**, I want **reserve inventory khi check availability**, So that **tôi không oversell khi có race conditions**.
+
+**FR Coverage:** FR3 enhancement
+
+#### Story 2.15: Yoom Gateway Timeout & Circuit Breaker
+**As a system**, I want **handle Yoom gateway timeouts và implement circuit breaker**, So that **tôi có thể handle Yoom failures gracefully**.
+
+**FR Coverage:** FR1 enhancement
+
+#### Story 2.16: Failed Order Review Interface
+**As a operations team**, I want **review interface cho failed orders**, So that **tôi có thể handle exceptions manually**.
+
+**FR Coverage:** FR92 enhancement
+
+#### Story 2.17: Manual Override for Edge Cases
+**As a operations team**, I want **manual override capability cho edge cases**, So that **tôi có thể handle special situations**.
+
+**FR Coverage:** New requirement
+
+#### Story 2.18: Bulk Order Actions
+**As a operations team**, I want **bulk approve/reject orders**, So that **tôi có thể handle nhiều orders cùng lúc efficiently**.
+
+**FR Coverage:** New requirement
+
+#### Story 2.19: Inventory Sync Monitoring & Alerting
+**As a operations team**, I want **monitor inventory sync lag và receive alerts**, So that **tôi biết khi có sync issues**.
+
+**FR Coverage:** FR72 enhancement
+
+#### Story 2.20: Webhook Queue Monitoring & Auto-scaling
+**As a system**, I want **monitor webhook queue length và auto-scale**, So that **tôi không có processing delays**.
+
+**FR Coverage:** FR1 enhancement
+
+#### Story 2.21: Kintone API Health Check & Fallback
+**As a system**, I want **monitor Kintone API health và có fallback mechanism**, So that **tôi có thể handle Kintone downtime**.
+
+**FR Coverage:** FR8 enhancement
+
+#### Story 2.22: Webhook Replay Protection
+**As a system**, I want **validate webhook timestamps và prevent replay attacks**, So that **tôi không process duplicate/replay webhooks**.
+
+**FR Coverage:** FR100 enhancement
+
+#### Story 2.23: Comprehensive Business Rules Validation
+**As a system**, I want **validate orders với comprehensive business rules**, So that **tôi reject invalid orders (negative quantities, etc.)**.
+
+**FR Coverage:** FR5 enhancement
+
+#### Story 2.24: Kintone API Versioning & Backward Compatibility
+**As a developer**, I want **support Kintone API versioning và backward compatibility**, So that **tôi có thể handle API changes**.
+
+**FR Coverage:** FR8 enhancement
+
+**Epic 2 Updated Summary:**
+- Original: 10 stories
+- Additional: 14 stories from Advanced Elicitation
+- **Total: 24 stories**
+
+---
+
+### Epic 3: Fulfillment Automation (Enhanced)
+
+#### Story 3.6: Optimize Picking Route (Multi-Order Picking)
+**As a nhân viên kho**, I want **picking route được optimize cho multiple orders**, So that **tôi có thể pick nhiều orders cùng lúc efficiently**.
+
+**FR Coverage:** FR11 enhancement
+
+**Epic 3 Updated Summary:**
+- Original: 5 stories
+- Additional: 1 story
+- **Total: 6 stories**
+
+---
+
+### Epic 4: Warehouse Management Core (Enhanced)
+
+#### Story 4.15: Inventory Change Audit Trail & Anomaly Detection
+**As a system**, I want **audit trail cho inventory changes và detect anomalies**, So that **tôi có thể detect manipulation attempts**.
+
+**FR Coverage:** FR64, FR97 enhancement
+
+#### Story 4.16: Inventory Aging Alerts
+**As a warehouse manager**, I want **alerts khi inventory aging (hàng tồn kho quá lâu)**, So that **tôi có thể manage inventory turnover**.
+
+**FR Coverage:** New requirement
+
+#### Story 4.17: Daily Warehouse Activity Report
+**As a warehouse manager**, I want **daily warehouse activity report**, So that **tôi có visibility về warehouse operations**.
+
+**FR Coverage:** New requirement
+
+**Epic 4 Updated Summary:**
+- Original: 14 stories
+- Additional: 3 stories
+- **Total: 17 stories**
+
+---
+
+### Epic 5: BtoB Portal & Self-Service (Enhanced)
+
+#### Story 5.11: Modify Order Before Approval
+**As a đại lý**, I want **modify order trước khi được approve**, So that **tôi có thể correct mistakes**.
+
+**FR Coverage:** FR76 enhancement
+
+#### Story 5.12: Cancel Order with Approval Workflow
+**As a đại lý**, I want **cancel order với approval workflow**, So that **tôi có thể cancel orders khi cần**.
+
+**FR Coverage:** New requirement
+
+#### Story 5.13: Save Order as Draft
+**As a đại lý**, I want **save order as draft để complete later**, So that **tôi có thể đặt hàng khi có thời gian**.
+
+**FR Coverage:** FR76 enhancement
+
+#### Story 5.14: BtoB Portal Authorization & Data Isolation Testing
+**As a system**, I want **comprehensive authorization checks và data isolation testing**, So that **đại lý chỉ thấy data của họ**.
+
+**FR Coverage:** FR75 enhancement
+
+#### Story 5.15: BtoB Portal Validation & Error Messages
+**As a đại lý**, I want **clear validation và error messages khi đặt hàng**, So that **tôi biết lỗi gì và cách fix**.
+
+**FR Coverage:** FR76 enhancement
+
+#### Story 5.16: Approval Workflow Notifications
+**As a manager**, I want **notifications (email/SMS) khi có order cần approve**, So that **tôi biết ngay khi có orders pending**.
+
+**FR Coverage:** FR81 enhancement
+
+**Epic 5 Updated Summary:**
+- Original: 10 stories
+- Additional: 6 stories
+- **Total: 16 stories**
+
+---
+
+### Epic 6: Payment & Financial Automation (Enhanced)
+
+#### Story 6.7: Financial Data Export for Reconciliation
+**As a nhân viên kế toán**, I want **export financial data để reconciliation**, So that **tôi có thể reconcile với external systems**.
+
+**FR Coverage:** FR84 enhancement
+
+**Epic 6 Updated Summary:**
+- Original: 6 stories
+- Additional: 1 story
+- **Total: 7 stories**
+
+---
+
+## Advanced Elicitation Summary
+
+**Total New Stories Identified:** 25 stories
+
+**Breakdown by Epic:**
+- Epic 2: +14 stories (Order Processing Automation)
+- Epic 3: +1 story (Fulfillment Automation)
+- Epic 4: +3 stories (Warehouse Management)
+- Epic 5: +6 stories (BtoB Portal)
+- Epic 6: +1 story (Payment & Financial)
+
+**Key Improvements:**
+1. ✅ **Error Handling:** Comprehensive error handling cho edge cases
+2. ✅ **Security:** Replay protection, authorization checks, anomaly detection
+3. ✅ **User Experience:** Order modification, draft saving, bulk actions
+4. ✅ **Monitoring:** Health checks, queue monitoring, sync monitoring
+5. ✅ **Reliability:** Fallback mechanisms, circuit breakers, recovery
+
+**Updated Total:**
+- **Original Stories:** 70+
+- **New Stories:** 25
+- **Total Stories:** 95+
+
+---
+
+**Document Status:** Enhanced with Advanced Elicitation  
 **Last Updated:** 2025-11-19
 

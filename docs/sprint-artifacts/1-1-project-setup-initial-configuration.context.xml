@@ -1,0 +1,158 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.1</storyId>
+    <title>Project Setup & Initial Configuration</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/1-1-project-setup-initial-configuration.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>Rails project được setup với đầy đủ dependencies và configuration</iWant>
+    <soThat>tôi có thể bắt đầu development ngay</soThat>
+    <tasks>
+      <task id="1" title="Initialize Rails project">
+        <subtask id="1.1">Create new Rails application với MySQL database</subtask>
+        <subtask id="1.2">Configure database.yml với MySQL connection</subtask>
+        <subtask id="1.3">Add Redis gem và configure Redis connection</subtask>
+        <subtask id="1.4">Add Sidekiq gem và configure Sidekiq</subtask>
+        <subtask id="1.5">Create .env.example với required environment variables</subtask>
+        <subtask id="1.6">Initialize Git repository và create .gitignore</subtask>
+      </task>
+      <task id="2" title="Setup project structure">
+        <subtask id="2.1">Create initializers directory structure</subtask>
+        <subtask id="2.2">Create services directory structure</subtask>
+        <subtask id="2.3">Create adapters directory structure</subtask>
+        <subtask id="2.4">Create jobs directory structure</subtask>
+        <subtask id="2.5">Create spec directory structure với RSpec setup</subtask>
+      </task>
+      <task id="3" title="Configure initializers">
+        <subtask id="3.1">Create config/initializers/kintone.rb với Kintone API configuration</subtask>
+        <subtask id="3.2">Create config/initializers/redis.rb với Redis connection configuration</subtask>
+        <subtask id="3.3">Create config/sidekiq.yml với Sidekiq configuration</subtask>
+      </task>
+      <task id="4" title="Verify setup">
+        <subtask id="4.1">Test Rails server starts successfully</subtask>
+        <subtask id="4.2">Test MySQL database connection</subtask>
+        <subtask id="4.3">Test Redis connection</subtask>
+        <subtask id="4.4">Test Sidekiq workers start successfully</subtask>
+        <subtask id="4.5">Verify all environment variables are documented in .env.example</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">
+      <given>project chưa được initialize</given>
+      <when>tôi chạy setup commands</when>
+      <then>Rails project được tạo với: Ruby on Rails (latest stable), MySQL database connection, Redis connection, Sidekiq configuration, Basic project structure (app/, config/, db/, spec/), Environment variables setup (.env.example), Git repository initialized</then>
+    </criterion>
+    <criterion id="2">
+      <given>Rails project đã được tạo</given>
+      <when>tôi start application</when>
+      <then>tất cả services sẽ: Rails server running và accessible, MySQL database accessible, Redis server running và accessible, Sidekiq workers running</then>
+    </criterion>
+    <criterion id="3">
+      <given>project structure đã được setup</given>
+      <when>tôi review project structure</when>
+      <then>project phải có: Proper directory structure theo Rails conventions, Initializers cho Kintone, Redis, Database configuration (database.yml), Sidekiq configuration (sidekiq.yml), Environment variables template (.env.example)</then>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>Silica-link - Product Requirements Document</title>
+        <section>Epic 1: Foundation & Infrastructure</section>
+        <snippet>Epic 1 establishes project foundation, core infrastructure, và deployment pipeline để enable tất cả subsequent development work. Story 1.1 requires Rails project setup với đầy đủ dependencies và configuration.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Silica-link - Architecture Document</title>
+        <section>Technology Stack Details, Project Structure, Implementation Patterns</section>
+        <snippet>Technology stack: Ruby on Rails (latest stable), Sidekiq, Redis, MySQL. Project structure follows Rails conventions với additional directories cho services và adapters. Configuration management uses environment variables cho sensitive data.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Silica-link - Epic Breakdown</title>
+        <section>Epic 1: Foundation & Infrastructure - Story 1.1</section>
+        <snippet>Story 1.1: Project Setup & Initial Configuration. Follow architecture decisions: Rails + Sidekiq + Redis + MySQL. Setup initializers cho Kintone, Redis. Configure database.yml và sidekiq.yml.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <!-- No existing code artifacts - this is the first story establishing project foundation -->
+      <!-- Project structure will be created as part of this story -->
+    </code>
+    <dependencies>
+      <ecosystem name="ruby">
+        <package name="rails">Latest stable version</package>
+        <package name="sidekiq">Latest stable version</package>
+        <package name="redis">Latest stable version</package>
+        <package name="mysql2">Latest stable version</package>
+        <package name="rspec-rails">For testing framework</package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>
+      <type>Architecture Pattern</type>
+      <description>Follow Rails conventions với separation of concerns: app/services/ cho business logic, app/adapters/ cho external API integration, app/jobs/ cho background processing</description>
+      <source>docs/architecture.md#Project-Structure</source>
+    </constraint>
+    <constraint>
+      <type>Technology Stack</type>
+      <description>Must use Ruby on Rails (latest stable), MySQL, Redis, Sidekiq. No alternative technologies allowed.</description>
+      <source>docs/architecture.md#Technology-Stack-Details</source>
+    </constraint>
+    <constraint>
+      <type>Configuration Management</type>
+      <description>Use environment variables cho sensitive data (API keys, secrets). Store template in .env.example</description>
+      <source>docs/architecture.md#Consistency-Rules</source>
+    </constraint>
+    <constraint>
+      <type>Naming Conventions</type>
+      <description>Follow Rails naming conventions: Controllers (Webhooks::ShopifyController), Services (OrderProcessor), Adapters (KintoneAdapter), Jobs (ProcessWebhookJob), Models (Order)</description>
+      <source>docs/architecture.md#Consistency-Rules</source>
+    </constraint>
+    <constraint>
+      <type>Database Strategy</type>
+      <description>MySQL cho temporary data storage. Kintone là source of truth cho business data. Rails sync data lên Kintone.</description>
+      <source>docs/architecture.md#Decision-2-Data-Persistence-Strategy</source>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <!-- No existing interfaces - this story establishes project foundation -->
+    <!-- Interfaces will be created in subsequent stories -->
+  </interfaces>
+
+  <tests>
+    <standards>
+      Setup RSpec cho testing framework. Create basic test structure trong spec/ directory với subdirectories cho models/, services/, adapters/, jobs/. Ensure test database configuration. Follow Rails testing conventions với unit tests và integration tests.
+    </standards>
+    <locations>
+      <location>spec/</location>
+      <location>spec/models/</location>
+      <location>spec/services/</location>
+      <location>spec/adapters/</location>
+      <location>spec/jobs/</location>
+    </locations>
+    <ideas>
+      <idea criterionId="1">
+        Test Rails application initialization: Verify Rails server starts, database connection works, Redis connection works, Sidekiq workers start
+      </idea>
+      <idea criterionId="2">
+        Test service startup: Verify all services (Rails, MySQL, Redis, Sidekiq) are accessible và running
+      </idea>
+      <idea criterionId="3">
+        Test project structure: Verify directory structure matches Rails conventions với additional directories (services, adapters, jobs), verify initializers exist, verify configuration files exist
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+
